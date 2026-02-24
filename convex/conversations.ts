@@ -58,6 +58,7 @@ export const getUserConversations = query({
       conv.participants.includes(args.userId)
     );
 
+    const now = Date.now();
     const conversationsWithDetails = await Promise.all(
       conversations.map(async (conv) => {
         let displayName = "Unknown User";
@@ -75,6 +76,11 @@ export const getUserConversations = query({
             if (otherUser) {
               displayName = otherUser.name || otherUser.email || "Unknown User";
               displayImage = otherUser.imageUrl || "";
+              // Check if user is truly online (active in last 60 seconds)
+              otherUser = {
+                ...otherUser,
+                isOnline: otherUser.isOnline && (now - otherUser.lastSeen < 60000),
+              };
             }
           }
         }
